@@ -24,12 +24,23 @@ jobs:
         with:
           gradle-version: '8.9'
 
+      - name: Extract Android Project
+        run: |
+          mkdir -p android-project
+          unzip -q ZiaAttaChaki_AndroidStudio_Project.zip -d android-project
+          PROJECT_DIR=$(dirname "$(find android-project -name settings.gradle.kts -print -quit)")
+          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+
       - name: Build APK
-        run: gradle assembleDebug
+        run: |
+          gradle -p "$PROJECT_DIR" assembleDebug
+          APK=$(find "$PROJECT_DIR" -path '*/app/build/outputs/apk/debug/app-debug.apk' -print -quit)
+          test -n "$APK"
+          cp "$APK" app-debug.apk
 
       - name: Save APK
         uses: actions/upload-artifact@v4
         with:
           name: Zia-Atta-Chaki-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app-debug.apk
           
